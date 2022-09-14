@@ -16,7 +16,7 @@ class D2Perk(D2JsonModel):
 
     @classmethod
     def from_json(cls, **json: str) -> D2Perk:
-        return cls(name=json["name"], description=json["description"], img_url=json["img_url"])
+        return cls(name=json["name"], description=json["description"], img_url=json.get("img_url"))
 
     def to_json(self) -> JSON:
         return {
