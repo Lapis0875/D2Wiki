@@ -9,7 +9,6 @@ class NotionRichText:
 
     @classmethod
     def from_json(cls, json: JSON):
-        print(json)
         return cls(raw=json.get("plain_text") or json["text"]["content"])
 
     def __str__(self):
