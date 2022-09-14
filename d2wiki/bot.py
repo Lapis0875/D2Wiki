@@ -22,6 +22,7 @@ class D2WikiBot(Bot):
         self.logger = get_logger("d2wiki", stream=True, file=True)
 
     def run(self):
+        self.load_extension("d2wiki.plugins.d2notion")
         super().run(self.config.pop("token"))
 
     async def on_ready(self):
