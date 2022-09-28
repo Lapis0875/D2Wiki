@@ -1,0 +1,10 @@
+{
+  "token": "YOUR_BOT_TOKEN",
+  "notion": {
+    "token": "YOUR_NOTION_TOKEN"
+  },
+  "plugins": {
+    "dev": "Dev",
+    "notion": "D2Notion"
+  }
+}

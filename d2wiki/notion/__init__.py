@@ -1,5 +1,6 @@
 """
-Destiny2 Notion <-> Discord Bot integration.
+Destiny2 Notion <-> Discord Bot integration plugin.
 """
 
-from .client import D2NotionWrapper
+from .wrapper import D2NotionWrapper
+from . import models

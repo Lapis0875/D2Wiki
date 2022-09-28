@@ -6,7 +6,7 @@ import datetime
 
 import pytz
 
-__all__ = ("UTC", "KST", "utcnow", "kstnow", "from_utc_isoformat", "get_discord_timestamp")
+__all__ = ("UTC", "KST", "utcnow", "kstnow", "from_utc_isoformat", "get_discord_timestamp", "notion2dt", "dt2notion")
 
 UTC = pytz.UTC
 KST = pytz.timezone("Asia/Seoul")
@@ -51,3 +51,21 @@ def get_discord_timestamp(dt: datetime.datetime, style: str = None):
         dt = dt.replace(tzinfo=UTC)
 
     return f"(KST) <t:{int(dt.timestamp())}" + (f":{style}>" if style else ">")
+
+
+def notion2dt(dt_str: str) -> datetime.datetime:
+    """
+    Parse Notion's datetime string into datetime object.
+    :param dt_str: Notion's datetime string.
+    :return: datetime object.
+    """
+    return UTC.localize(datetime.datetime.strptime(dt_str, "%Y-%m-%dT%H:%M:%S.%fZ"))
+
+
+def dt2notion(dt: datetime.datetime) -> str:
+    """
+    Parse python's aware datetime objecti nto Notion's datetime string.
+    :param dt: datetime object.
+    :return: Notion's datetime string.
+    """
+    return dt.strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3] + "Z"

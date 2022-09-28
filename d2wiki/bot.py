@@ -16,17 +16,19 @@ class D2WikiBot(Bot):
         return await super(D2WikiBot, self).sync_commands([command], force=force, guild_ids=guild_ids)
 
     def __init__(self):
-        super().__init__()
+        super().__init__(owner_id=280855156608860160)
         with open("./config.json", mode="rt", encoding="utf-8") as f:
             self.config: dict[str, Any] = json.load(f)
         self.logger = get_logger("d2wiki", stream=True, file=True)
 
     def run(self):
-        self.load_extension("d2wiki.plugins.d2notion")
+        for plugin_path in self.config["plugins"].keys():       # path: plugin.name
+            self.load_extension(f"d2wiki.plugins.{plugin_path}")
         super().run(self.config.pop("token"))
 
     async def on_ready(self):
         self.logger.info("D2Wiki Online 🟢")
+        await self.application_info()   # fetch self info.
 
     async def on_disconnect(self):
         self.logger.info("D2Wiki Offline 🔴")
