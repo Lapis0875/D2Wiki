@@ -31,6 +31,7 @@ class D2ElementalWell(D2JsonModel):
     Destiny2 Elemental Well Model.
     원소샘이 Elemntal Well이 맞나?
     """
+    id: str = attr.ib(repr=True, eq=True, hash=True)    # notion id.
     name: str = attr.ib(repr=True, eq=True, hash=True)
     element: D2Element = attr.ib(repr=True, eq=True, hash=True)
     mod_type: D2ElementalWellModType = attr.ib(repr=True, eq=True, hash=True)
@@ -41,15 +42,16 @@ class D2ElementalWell(D2JsonModel):
     img_url: str | None = attr.ib(default=None, repr=False, eq=False, hash=False)
 
     @classmethod
-    def from_json(cls, **json: JSON_VALUES | D2NotionWrapper) -> D2ElementalWell:
+    def from_json(cls, nc: D2NotionWrapper, _id: str, **json: JSON_VALUES) -> D2ElementalWell:
         return cls(
-            nc=json["nc"],
+            nc=nc,
+            id=_id,
             name=json["name"],
             element=cast(D2Element, D2Element(json["element"])),
             mod_type=cast(D2ElementalWellModType, D2ElementalWellModType(json["mod_type"])),
             cost=json["cost"],
             description=json["description"],
-            page_url=json["page_url"],
+            page_url=nc.get_shared_url(_id),
             img_url=json["img_url"]
         )
 

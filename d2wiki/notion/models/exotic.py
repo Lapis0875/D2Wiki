@@ -27,6 +27,7 @@ class D2ExoticWeapon(D2JsonModel):
     """
     Exotic Weapon model.
     """
+    id: str = attr.ib(repr=True, eq=True, hash=True)    # notion id.
     name: str = attr.ib(repr=True, eq=True, hash=True)
     category: D2WeaponCategory = attr.ib(repr=True, eq=True, hash=True)
     exotic_perk_name: str = attr.ib(repr=True, eq=True, hash=True)
@@ -36,15 +37,16 @@ class D2ExoticWeapon(D2JsonModel):
     img_url: str | None = attr.ib(default=None, eq=False, hash=False)
 
     @classmethod
-    def from_json(cls, **json: str | D2NotionWrapper) -> D2ExoticWeapon:
+    def from_json(cls, nc: D2NotionWrapper, _id: str, **json: str) -> D2ExoticWeapon:
         return cls(
-            nc=json["nc"],
+            nc=nc,
+            id=_id,
             name=json["name"],
             category=D2WeaponCategory(json["category"]),
             exotic_perk_name=json["exotic_perk_name"],
             weapon_slot=D2WeaponSlot(json["weapon_slot"]),
             description=json["description"],
-            page_url=json["page_url"],
+            page_url=nc.get_shared_url(_id),
             img_url=json.get("img_url")
         )
 
@@ -61,7 +63,7 @@ class D2ExoticWeapon(D2JsonModel):
 
     @property
     def embed(self) -> Embed:
-        return Embed(
+        e = Embed(
             title=self.name,
             color=EXOTIC_COLOR
         ).add_field(
@@ -76,7 +78,16 @@ class D2ExoticWeapon(D2JsonModel):
             name="효과",
             value=wrap_diff(self.description),
             inline=False
+        ).add_field(
+            name="노션에서 보기",
+            value=f"[클릭]({self.page_url})",
+            inline=False
         )
+
+        if self.img_url is not None:
+            e.set_thumbnail(url=self.img_url)
+
+        return e
 
 
 @attr.s
@@ -84,6 +95,7 @@ class D2ExoticArmor(D2JsonModel):
     """
     Exotic Armor model.
     """
+    id: str = attr.ib(repr=True, eq=True, hash=True)    # notion id.
     name: list[RichText] = attr.ib(repr=True, eq=True, hash=True)
     exotic_perk_name: list[RichText] = attr.ib(repr=True, eq=True, hash=True)
     guardian_class: D2GuardianClass = attr.ib(repr=True, eq=True, hash=True)
@@ -93,14 +105,15 @@ class D2ExoticArmor(D2JsonModel):
     img_url: str | None = attr.ib(default=None, eq=False, hash=False)
 
     @classmethod
-    def from_json(cls, **json: str | D2NotionWrapper) -> D2ExoticArmor:
+    def from_json(cls, nc: D2NotionWrapper, _id: str, **json: str | dict) -> D2ExoticArmor:
         return cls(
-            nc=json["nc"],
+            nc=nc,
+            id=_id,
             name=[RichText.from_json(**r) for r in json["name"]],
             exotic_perk_name=[RichText.from_json(**r) for r in json["exotic_perk_name"]],
             guardian_class=D2GuardianClass(json["guardian_class"]),
             category=D2ArmorCategory(json["category"]),
-            page_url=json["page_url"],
+            page_url=nc.get_shared_url(_id),
             img_url=json.get("img_url")
         )
 
@@ -117,7 +130,7 @@ class D2ExoticArmor(D2JsonModel):
 
     async def resolve_description(self) -> D2ExoticArmor:
         print(f"Resolving description for {self.name}")
-        page = await self.nc.retrieve_page(self.nc.get_id(self.page_url))
+        page = await self.nc.retrieve_page(self.id)
         await page.retrieve_children()
         # print(f"{self.name} 의 노션 페이지 내 자식 블록 개수 : {len(page.children)}")
         # print(page.children)
@@ -151,6 +164,10 @@ class D2ExoticArmor(D2JsonModel):
         ).add_field(
             name="효과",
             value=self.description or "아직 작성중입니다.",
+            inline=False
+        ).add_field(
+            name="노션에서 보기",
+            value=f"[클릭]({self.page_url})",
             inline=False
         )
 

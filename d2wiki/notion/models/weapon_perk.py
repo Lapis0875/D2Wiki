@@ -17,6 +17,7 @@ class D2Perk(D2JsonModel):
     """
     D2 Perk Model.
     """
+    id: str = attr.ib(repr=True, eq=True, hash=True)    # notion id.
     name: list[RichText] = attr.ib(repr=True, eq=True, hash=True)
     description: list[RichText] = attr.ib(repr=False, eq=False, hash=True)
     page_url: str = attr.ib(eq=True, hash=True)
@@ -24,12 +25,13 @@ class D2Perk(D2JsonModel):
     valid_weapons: list[D2WeaponCategory] = attr.ib(default=attr.Factory(list), eq=False, hash=False)
 
     @classmethod
-    def from_json(cls, **json: str | D2NotionWrapper | JSON) -> D2Perk:
+    def from_json(cls, nc: D2NotionWrapper, _id: str, **json: str | dict) -> D2Perk:
         return cls(
-            nc=json["nc"],
+            nc=nc,
+            id=_id,
             name=[RichText.from_json(**r) for r in json["name"]],
             description=[RichText.from_json(**r) for r in json["description"]],
-            page_url=json["page_url"],
+            page_url=nc.get_shared_url(_id),
             img_url=json.get("img_url")
         )
 

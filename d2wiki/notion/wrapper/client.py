@@ -10,11 +10,17 @@ from d2wiki.notion.models import D2ElementalWell, D2ExoticWeapon, D2ExoticArmor,
     NotionDatabase, NotionUser, NotionBlock
 
 
-class HasChildren(Protocol):
+class NotionObject(Protocol):
+    """
+    Protocols for Notion Models with id.
+    """
+    id: str     # id of this object.
+
+
+class HasChildren(NotionObject):
     """
     Protocols for Notion Models which have children.
     """
-    id: str     # id of this object.
     nc: D2NotionWrapper     # Notion Client
     children: list[NotionBlock]     # list to store children.
 
@@ -54,6 +60,10 @@ class D2NotionWrapper:
 
     get_id = staticmethod(get_id)       # wrap helper function 'get_id' into D2NotionWrapper
 
+    @staticmethod
+    def get_shared_url(_id: str):
+        return f"https://destinyko.notion.site/{_id.replace('-', '')}"
+
     async def query_perks(self, route: str, perk_name: str) -> list[D2Perk]:
         resp = await self.client.databases.query(**{
             "database_id": route,
@@ -71,6 +81,7 @@ class D2NotionWrapper:
         try:
             return [D2Perk.from_json(
                 nc=self,
+                _id=page["id"],
                 name=page["properties"]["이름"]["title"],
                 description=page["properties"]["설명"]["rich_text"],
                 page_url=page["url"],
@@ -98,6 +109,7 @@ class D2NotionWrapper:
         try:
             return [D2ElementalWell.from_json(
                 nc=self,
+                _id=page["id"],
                 name=flat_rich_text(page["properties"]["이름"]["title"]),
                 element=page["properties"]["원소"]["select"]["name"],
                 mod_type=page["properties"]["분류"]["select"]["name"],
@@ -129,6 +141,7 @@ class D2NotionWrapper:
         try:
             return [D2ExoticWeapon.from_json(
                 nc=self,
+                _id=page["id"],
                 name=flat_rich_text(page["properties"]["이름"]["title"]),
                 exotic_perk=flat_rich_text(page["properties"]["경이 특성"]["rich_text"]),
                 description=flat_rich_text(page["properties"]["설명"]["rich_text"]),
@@ -156,6 +169,7 @@ class D2NotionWrapper:
         try:
             res = [D2ExoticArmor.from_json(
                 nc=self,
+                _id=page["id"],
                 name=page["properties"]["이름"]["title"],
                 guardian_class=page["properties"]["직업"]["select"]["name"],
                 category=page["properties"]["부위"]["select"]["name"],
@@ -202,7 +216,7 @@ class D2NotionWrapper:
         """
         resp = await self.client.pages.retrieve(page_id=page_id)
 
-        # from pprint import pprint
+        from pprint import pprint
         # pprint(resp)
 
         try:
