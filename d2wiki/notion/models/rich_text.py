@@ -205,7 +205,6 @@ def wrap_diff(text: str) -> str:
     return f"```diff\n{text}\n```"
 
 
-# TODO - Convert RichText colorization using ANSI colors?
 def ansi_colorize(rich_texts: Iterable[RichText]) -> str:
     """
     Wrap plain text with `ansi` codeblock, thereby colorizing some parts.
